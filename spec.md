@@ -309,7 +309,7 @@ The active game must not require page scrolling at supported viewport sizes.
 - Announce new clues, lockouts, round results, and connection changes to
   assistive technology without repeatedly stealing focus.
 - Respect `prefers-reduced-motion` and provide a mute control.
-- Maintain readable contrast across all selected visual themes.
+- Maintain readable contrast throughout the selected visual system.
 
 ## Sound And Motion
 
@@ -325,22 +325,84 @@ Prototype candidates:
 All effects must be optional. Functional timing cannot depend on animation
 completion.
 
-## Visual Direction Exploration
+## Visual System
 
-The final visual system is intentionally undecided. `designs.html` is the
-comparison artifact for evaluating six initial directions against the same
-game scaffold:
+The selected direction is **Restaurant Ticket**: fast, tactile, warm, and
+rooted in the rhythm of a working kitchen. It should feel like ink, paper, and
+the practical artifacts of restaurant service rather than a generic trivia
+game.
 
-1. Restaurant Ticket
-2. Bistro Chalkboard
-3. Retro Diner
-4. Stainless Kitchen
-5. Midnight Kitchen
-6. Editorial Cookbook
+This decision covers visual primitives only. Screen composition, information
+hierarchy, navigation, responsive arrangement, and interaction layout remain
+deliberately undecided. Future design work should begin from the product
+requirements in this document and must not infer a layout from earlier visual
+explorations or Git history.
 
-Each direction includes its palette, typography notes, game controls, answer
-results, ingredient states, and invite-room treatment. The comparison page is
-not production application code.
+### Palette
+
+| Role | Name | Value | Intended use |
+| --- | --- | --- | --- |
+| Primary surface | Paper | `#FFF8EA` | Cards, tickets, fields, and principal readable surfaces |
+| Canvas | Kraft | `#EFE5D4` | Page background and quieter secondary areas |
+| Primary text | Ink | `#25221D` | Text, strong borders, and high-emphasis controls |
+| Action | Paprika | `#D84A32` | Primary actions, active clues, urgency, and focus |
+| Success | Herb | `#47725A` | Correct answers, connection health, and confirmation |
+| Supporting line | Ticket line | `#B8AA96` | Dividers, inactive borders, and structural rules |
+| Muted text | Faded ink | `#756D61` | Secondary labels and supporting information |
+
+Paprika and Herb communicate different meanings and should not be used as
+interchangeable decoration. States must also use text, iconography, shape, or
+another non-color signal.
+
+### Typography
+
+- **Display and utility face:** IBM Plex Mono.
+- **Body and interface face:** DM Sans.
+- Use IBM Plex Mono for ticket-like headings, timers, round identifiers,
+  ingredient numbers, codes, and compact operational labels.
+- Use DM Sans for player names, explanations, answer results, buttons, and
+  longer interface copy.
+- Headings may use uppercase and modest tracking when they resemble printed
+  service labels; body copy should retain normal casing for readability.
+- Tabular numerals should be used for countdowns and changing numeric values.
+
+The fonts may be self-hosted or loaded as web fonts in the prototype. The
+interface must retain sensible system fallbacks and avoid layout shifts that
+affect gameplay.
+
+### Shape And Material
+
+- Predominantly square corners or a very small radius, rather than soft app
+  cards and pills.
+- Strong ink borders for active controls; lighter ticket-line borders for
+  secondary structure.
+- Dashed rules may suggest perforation or separation where semantically
+  useful.
+- Subtle paper grain is permitted on large surfaces but must never reduce text
+  clarity.
+- Small rotations or imperfect registration may be used sparingly for static
+  ticket details, never for inputs, timers, or dense changing information.
+- Shadows should resemble offset paper layers rather than diffuse floating
+  glass panels.
+
+### Iconography And Motion
+
+- Prefer simple stamped, printed, or utilitarian line icons.
+- Avoid food emoji as core interface iconography.
+- A newly revealed ingredient may enter with a quick ticket-stamp motion.
+- Success feedback may resemble a check stamp using Herb.
+- Motion must remain brief, optional, and independent of authoritative game
+  timing.
+
+### Visual Guardrails
+
+- Do not treat the visual direction as a requirement to imitate point-of-sale
+  software.
+- Do not sacrifice scan speed for decorative restaurant realism.
+- Do not mix in unrelated visual motifs unless the visual direction is
+  explicitly reconsidered.
+- Do not use a previous mockup as the basis for screen layout. No visual
+  reference file is intentionally retained in the working tree.
 
 ## Prototype Scope
 
@@ -388,7 +450,8 @@ The prototype should answer these questions before expanding scope:
 
 ## Open Decisions
 
-- Final visual direction or combination of directions.
+- Screen layouts and information hierarchy within the Restaurant Ticket visual
+  system.
 - Whether Quick Play bots are explicitly labeled.
 - Initial puzzle count and cuisine distribution.
 - Exact typo-matching tolerance.
