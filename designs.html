@@ -1,0 +1,2293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Visual direction board for the Guess the Dish multiplayer game prototype."
+    >
+    <title>Guess the Dish | Visual Direction Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Caveat:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Libre+Franklin:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    >
+    <style>
+      :root {
+        color-scheme: light;
+        --board-bg: #ebe9e3;
+        --board-paper: #f8f7f3;
+        --board-ink: #171715;
+        --board-muted: #6f6e68;
+        --board-line: #cfcdc5;
+        --board-accent: #ed5b3a;
+        --board-width: 1480px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--board-ink);
+        background:
+          linear-gradient(rgba(23, 23, 21, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(23, 23, 21, 0.025) 1px, transparent 1px),
+          var(--board-bg);
+        background-size: 24px 24px;
+        font-family: "DM Sans", Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        color: inherit;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .board-header {
+        width: min(calc(100% - 48px), var(--board-width));
+        margin: 0 auto;
+        padding: 64px 0 38px;
+      }
+
+      .board-kicker,
+      .direction-index,
+      .control-label,
+      .preview-label,
+      .meta-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .board-kicker {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 23px;
+      }
+
+      .board-kicker::before {
+        width: 36px;
+        height: 5px;
+        content: "";
+        background: var(--board-accent);
+      }
+
+      .board-intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+        gap: clamp(40px, 8vw, 130px);
+        align-items: end;
+      }
+
+      .board-title {
+        max-width: 900px;
+        margin: 0;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: clamp(52px, 7vw, 104px);
+        font-weight: 600;
+        letter-spacing: -0.055em;
+        line-height: 0.9;
+      }
+
+      .board-title em {
+        color: var(--board-accent);
+        font-style: normal;
+      }
+
+      .board-summary {
+        max-width: 460px;
+        margin: 0 0 5px;
+        color: #4e4d48;
+        font-size: 17px;
+        line-height: 1.65;
+      }
+
+      .board-facts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        margin-top: 46px;
+        overflow: hidden;
+        border: 1px solid var(--board-line);
+        background: var(--board-line);
+      }
+
+      .board-fact {
+        min-height: 86px;
+        padding: 18px 20px;
+        background: var(--board-paper);
+      }
+
+      .board-fact strong {
+        display: block;
+        margin-top: 8px;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 19px;
+        font-weight: 600;
+      }
+
+      .direction-jump {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .jump-link {
+        display: flex;
+        min-width: 0;
+        padding: 10px;
+        align-items: center;
+        gap: 9px;
+        border: 1px solid var(--board-line);
+        background: rgba(248, 247, 243, 0.64);
+        text-decoration: none;
+        transition: transform 160ms ease, background 160ms ease;
+      }
+
+      .jump-link:hover,
+      .jump-link:focus-visible {
+        background: var(--board-paper);
+        transform: translateY(-2px);
+      }
+
+      .jump-colors {
+        display: flex;
+        flex: 0 0 auto;
+      }
+
+      .jump-colors i {
+        width: 10px;
+        height: 22px;
+        background: var(--jump-color);
+      }
+
+      .jump-link span:last-child {
+        overflow: hidden;
+        font-size: 12px;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .board-controls-wrap {
+        position: sticky;
+        z-index: 50;
+        top: 0;
+        border-block: 1px solid var(--board-line);
+        background: rgba(248, 247, 243, 0.92);
+        box-shadow: 0 8px 28px rgba(23, 23, 21, 0.06);
+        backdrop-filter: blur(14px);
+      }
+
+      .board-controls {
+        display: flex;
+        width: min(calc(100% - 48px), var(--board-width));
+        min-height: 72px;
+        margin: 0 auto;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+      }
+
+      .control-groups,
+      .control-group,
+      .segmented-control {
+        display: flex;
+        align-items: center;
+      }
+
+      .control-groups {
+        gap: 30px;
+      }
+
+      .control-group {
+        gap: 12px;
+      }
+
+      .control-label {
+        color: var(--board-muted);
+      }
+
+      .segmented-control {
+        gap: 3px;
+        padding: 3px;
+        border: 1px solid var(--board-line);
+        background: #e8e6df;
+      }
+
+      .segmented-control button {
+        min-height: 34px;
+        padding: 7px 12px;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .segmented-control button[aria-pressed="true"] {
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(23, 23, 21, 0.13);
+      }
+
+      .control-note {
+        margin: 0;
+        color: var(--board-muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+      }
+
+      .design-board {
+        width: min(calc(100% - 48px), var(--board-width));
+        margin: 28px auto 100px;
+      }
+
+      .direction {
+        display: grid;
+        grid-template-columns: 290px minmax(0, 1fr);
+        gap: 0;
+        scroll-margin-top: 92px;
+        border: 1px solid var(--board-line);
+        background: var(--board-paper);
+      }
+
+      .direction + .direction {
+        margin-top: 28px;
+      }
+
+      .direction-notes {
+        position: relative;
+        z-index: 2;
+        padding: 29px 25px 26px;
+        border-right: 1px solid var(--board-line);
+        background: var(--board-paper);
+      }
+
+      .direction-index {
+        display: block;
+        margin-bottom: 28px;
+        color: var(--board-muted);
+      }
+
+      .direction-name {
+        margin: 0;
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 34px;
+        font-weight: 600;
+        letter-spacing: -0.035em;
+        line-height: 1;
+      }
+
+      .direction-line {
+        margin: 13px 0 0;
+        color: #55544f;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .direction-traits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 19px;
+      }
+
+      .trait {
+        padding: 5px 8px;
+        border: 1px solid var(--board-line);
+        color: #4f4e49;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .direction-meta {
+        display: grid;
+        gap: 13px;
+        margin-top: 26px;
+        padding-top: 19px;
+        border-top: 1px solid var(--board-line);
+      }
+
+      .meta-row {
+        display: grid;
+        grid-template-columns: 68px 1fr;
+        gap: 8px;
+      }
+
+      .meta-label {
+        color: var(--board-muted);
+        font-size: 9px;
+      }
+
+      .meta-value {
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.45;
+      }
+
+      .palette {
+        display: grid;
+        gap: 8px;
+        margin-top: 25px;
+      }
+
+      .palette-title {
+        margin: 0 0 2px;
+        color: var(--board-muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .swatch {
+        display: grid;
+        grid-template-columns: 25px 1fr auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .swatch-color {
+        width: 25px;
+        height: 25px;
+        border: 1px solid rgba(23, 23, 21, 0.16);
+        border-radius: 50%;
+        background: var(--swatch);
+      }
+
+      .swatch-name,
+      .swatch-code {
+        font-size: 10px;
+      }
+
+      .swatch-name {
+        font-weight: 700;
+      }
+
+      .swatch-code {
+        color: var(--board-muted);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .type-note {
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid var(--board-line);
+      }
+
+      .type-note strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 12px;
+      }
+
+      .direction-stage {
+        min-width: 0;
+        padding: 22px;
+        background:
+          linear-gradient(45deg, rgba(0, 0, 0, 0.025) 25%, transparent 25%),
+          linear-gradient(-45deg, rgba(0, 0, 0, 0.025) 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.025) 75%),
+          linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.025) 75%),
+          #dfddd6;
+        background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+        background-size: 16px 16px;
+      }
+
+      .preview-pair {
+        display: grid;
+        grid-template-columns: minmax(540px, 1.65fr) minmax(280px, 0.75fr);
+        gap: 16px;
+        align-items: stretch;
+      }
+
+      .preview {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+      }
+
+      .preview-label {
+        display: flex;
+        height: 31px;
+        padding: 0 10px;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid #c4c1b8;
+        border-bottom: 0;
+        color: #6d6a62;
+        background: #f4f2ec;
+        font-size: 9px;
+      }
+
+      .preview-size {
+        font-weight: 400;
+        letter-spacing: 0.04em;
+      }
+
+      .app {
+        --canvas: #eee;
+        --surface: #fff;
+        --surface-2: #f6f6f6;
+        --ink: #111;
+        --muted: #777;
+        --line: #ccc;
+        --accent: #e44;
+        --accent-ink: #fff;
+        --success: #198754;
+        --field: #fff;
+        --field-ink: var(--ink);
+        --font-ui: "DM Sans", sans-serif;
+        --font-display: "DM Sans", sans-serif;
+        position: relative;
+        display: flex;
+        min-height: 650px;
+        overflow: hidden;
+        flex: 1;
+        flex-direction: column;
+        border: 1px solid var(--line);
+        color: var(--ink);
+        background: var(--canvas);
+        box-shadow: 0 8px 20px rgba(20, 20, 18, 0.08);
+        font-family: var(--font-ui);
+        isolation: isolate;
+      }
+
+      .app::before {
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        pointer-events: none;
+        content: "";
+      }
+
+      .app button {
+        font-family: inherit;
+      }
+
+      .app-header {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        min-height: 58px;
+        padding: 10px 17px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .app-brand {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      .app-brand small {
+        color: var(--accent);
+        font-family: var(--font-ui);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .sound-button {
+        display: inline-flex;
+        min-height: 31px;
+        padding: 0 9px;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        background: transparent;
+        cursor: pointer;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .sound-icon {
+        display: flex;
+        height: 12px;
+        align-items: flex-end;
+        gap: 2px;
+      }
+
+      .sound-icon i {
+        display: block;
+        width: 2px;
+        background: var(--accent);
+      }
+
+      .sound-icon i:nth-child(1) {
+        height: 5px;
+      }
+
+      .sound-icon i:nth-child(2) {
+        height: 10px;
+      }
+
+      .sound-icon i:nth-child(3) {
+        height: 7px;
+      }
+
+      .game-body {
+        display: flex;
+        min-height: 0;
+        padding: 17px;
+        flex: 1;
+        flex-direction: column;
+      }
+
+      .scoreboard {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+      }
+
+      .player {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .player.is-opponent {
+        flex-direction: row-reverse;
+        text-align: right;
+      }
+
+      .avatar {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        color: var(--accent-ink);
+        background: var(--accent);
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .player.is-opponent .avatar {
+        color: var(--ink);
+        background: var(--surface-2);
+      }
+
+      .player-name {
+        display: block;
+        overflow: hidden;
+        font-size: 12px;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .player-status {
+        display: flex;
+        margin-top: 5px;
+        align-items: center;
+        gap: 5px;
+        color: var(--muted);
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .player.is-opponent .player-status {
+        justify-content: flex-end;
+      }
+
+      .connection-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--success);
+      }
+
+      .score-dots {
+        display: flex;
+        gap: 4px;
+      }
+
+      .player.is-opponent .score-dots {
+        justify-content: flex-end;
+      }
+
+      .score-dots i {
+        display: block;
+        width: 13px;
+        height: 5px;
+        margin-top: 6px;
+        border: 1px solid var(--line);
+        background: transparent;
+      }
+
+      .score-dots i.is-won {
+        border-color: var(--accent);
+        background: var(--accent);
+      }
+
+      .versus {
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+      }
+
+      .round-heading {
+        display: flex;
+        margin-top: 22px;
+        align-items: end;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .round-eyebrow {
+        display: block;
+        color: var(--accent);
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .round-title {
+        margin: 4px 0 0;
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 1.05;
+      }
+
+      .next-clue {
+        flex: 0 0 auto;
+        color: var(--muted);
+        text-align: right;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .next-clue strong {
+        display: block;
+        margin-top: 2px;
+        color: var(--ink);
+        font-family: var(--font-display);
+        font-size: 19px;
+        letter-spacing: -0.04em;
+      }
+
+      .timer-track {
+        height: 5px;
+        margin-top: 11px;
+        overflow: hidden;
+        background: var(--surface-2);
+      }
+
+      .timer-fill {
+        width: 62%;
+        height: 100%;
+        background: var(--accent);
+        transform-origin: left;
+        animation: timer-breathe 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes timer-breathe {
+        to {
+          transform: scaleX(0.76);
+        }
+      }
+
+      .clue-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 7px;
+        margin-top: 15px;
+      }
+
+      .clue {
+        position: relative;
+        display: flex;
+        min-height: 62px;
+        padding: 9px;
+        overflow: hidden;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .clue-number {
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+      }
+
+      .clue-name {
+        overflow: hidden;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+      }
+
+      .clue.is-current {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+
+      .clue.is-current .clue-number {
+        color: currentColor;
+        opacity: 0.72;
+      }
+
+      .clue.is-hidden {
+        border-style: dashed;
+        color: var(--muted);
+        background: transparent;
+      }
+
+      .clue.is-hidden .clue-name {
+        font-family: var(--font-display);
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      .answer-area {
+        position: relative;
+        z-index: 3;
+        margin-top: auto;
+        padding-top: 17px;
+      }
+
+      .answer-label {
+        display: flex;
+        margin-bottom: 6px;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .answer-label span:last-child {
+        opacity: 0.8;
+      }
+
+      .answer-input-wrap {
+        position: relative;
+      }
+
+      .answer-input {
+        width: 100%;
+        height: 46px;
+        padding: 0 66px 0 13px;
+        border: 2px solid var(--ink);
+        border-radius: 0;
+        outline: 0;
+        color: var(--field-ink);
+        background: var(--field);
+        caret-color: var(--accent);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .answer-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent);
+      }
+
+      .enter-key {
+        position: absolute;
+        top: 50%;
+        right: 9px;
+        padding: 4px 6px;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        background: var(--surface-2);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+        transform: translateY(-50%);
+      }
+
+      .answer-menu {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-top: 0;
+        background: var(--field);
+        color: var(--field-ink);
+        box-shadow: 0 8px 18px rgba(20, 20, 18, 0.13);
+      }
+
+      .answer-option {
+        display: flex;
+        min-height: 37px;
+        padding: 7px 11px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-top: 1px solid var(--line);
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      button.answer-option {
+        width: 100%;
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        color: inherit;
+        background: transparent;
+        text-align: left;
+      }
+
+      .answer-option:first-child {
+        border-top: 0;
+      }
+
+      .answer-option.is-active {
+        color: var(--accent-ink);
+        background: var(--accent);
+      }
+
+      .option-hint {
+        flex: 0 0 auto;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+        font-weight: 500;
+        opacity: 0.7;
+        text-transform: uppercase;
+      }
+
+      .game-footnote {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 8px;
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      .room-body {
+        display: flex;
+        min-height: 0;
+        padding: 22px 18px 18px;
+        flex: 1;
+        flex-direction: column;
+      }
+
+      .room-eyebrow {
+        color: var(--accent);
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .room-title {
+        max-width: 250px;
+        margin: 8px 0 0;
+        font-family: var(--font-display);
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 0.98;
+      }
+
+      .room-copy {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.55;
+      }
+
+      .seats {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 26px;
+      }
+
+      .seat {
+        min-width: 0;
+        padding: 13px 10px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        text-align: center;
+      }
+
+      .seat-avatar {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        margin: 0 auto 9px;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        color: var(--accent-ink);
+        background: var(--accent);
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .seat.is-empty .seat-avatar {
+        border-style: dashed;
+        color: var(--muted);
+        background: transparent;
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      .seat-name {
+        display: block;
+        overflow: hidden;
+        font-size: 10px;
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .seat-status {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 7px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .table-mark {
+        position: absolute;
+        z-index: 2;
+        top: 50%;
+        left: 50%;
+        display: grid;
+        width: 26px;
+        height: 26px;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        color: var(--muted);
+        background: var(--canvas);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 7px;
+        font-weight: 700;
+        transform: translate(-50%, -50%);
+      }
+
+      .invite-section {
+        margin-top: 21px;
+      }
+
+      .invite-label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: 7px;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .invite-code {
+        overflow: hidden;
+        padding: 11px;
+        border: 1px solid var(--line);
+        color: var(--field-ink);
+        background: var(--field);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 9px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .copy-button,
+      .leave-button {
+        width: 100%;
+        min-height: 42px;
+        border: 0;
+        cursor: pointer;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      .copy-button {
+        margin-top: 7px;
+        color: var(--accent-ink);
+        background: var(--accent);
+      }
+
+      .copy-button.is-copied {
+        background: var(--success);
+      }
+
+      .room-note {
+        display: flex;
+        margin: 17px 0 0;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 8px;
+        line-height: 1.45;
+      }
+
+      .room-note::before {
+        display: block;
+        width: 7px;
+        height: 7px;
+        margin-top: 2px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        content: "";
+        background: var(--success);
+      }
+
+      .leave-button {
+        margin-top: auto;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        background: transparent;
+      }
+
+      /* Direction 01: Restaurant Ticket */
+      .ticket .app {
+        --canvas: #efe5d4;
+        --surface: #fff8ea;
+        --surface-2: #eadfcd;
+        --ink: #25221d;
+        --muted: #756d61;
+        --line: #b8aa96;
+        --accent: #d84a32;
+        --accent-ink: #fffaf0;
+        --success: #47725a;
+        --field: #fffdf7;
+        --font-ui: "DM Sans", sans-serif;
+        --font-display: "IBM Plex Mono", monospace;
+        border-radius: 2px;
+        box-shadow: 8px 8px 0 rgba(81, 67, 49, 0.17);
+      }
+
+      .ticket .app::before {
+        opacity: 0.42;
+        background:
+          radial-gradient(circle at 20% 30%, rgba(82, 65, 44, 0.08) 0 0.6px, transparent 0.8px),
+          radial-gradient(circle at 70% 60%, rgba(82, 65, 44, 0.06) 0 0.7px, transparent 0.9px);
+        background-size: 13px 15px, 17px 19px;
+      }
+
+      .ticket .app-header {
+        border-bottom-style: dashed;
+      }
+
+      .ticket .app-brand {
+        align-items: center;
+        font-size: 15px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .ticket .app-brand::before {
+        width: 5px;
+        height: 27px;
+        content: "";
+        background: var(--accent);
+      }
+
+      .ticket .avatar,
+      .ticket .seat-avatar {
+        border-radius: 2px;
+      }
+
+      .ticket .score-dots i,
+      .ticket .timer-track,
+      .ticket .timer-fill {
+        border-radius: 0;
+      }
+
+      .ticket .clue:nth-child(odd) {
+        transform: rotate(-0.45deg);
+      }
+
+      .ticket .clue:nth-child(even) {
+        transform: rotate(0.4deg);
+      }
+
+      .ticket .clue::after {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 4px;
+        content: "";
+        background: var(--line);
+      }
+
+      .ticket .clue.is-current::after {
+        background: var(--ink);
+      }
+
+      .ticket .round-title,
+      .ticket .room-title {
+        text-transform: uppercase;
+      }
+
+      .ticket .copy-button,
+      .ticket .leave-button,
+      .ticket .sound-button {
+        border-radius: 0;
+      }
+
+      /* Direction 02: Bistro Chalkboard */
+      .bistro .app {
+        --canvas: #17352d;
+        --surface: #1d4036;
+        --surface-2: #284c42;
+        --ink: #f7edda;
+        --muted: #b9c5b7;
+        --line: #6e8a7d;
+        --accent: #f1c453;
+        --accent-ink: #18342d;
+        --success: #ef725d;
+        --field: #f3ead8;
+        --field-ink: #21352f;
+        --font-ui: "DM Sans", sans-serif;
+        --font-display: "Caveat", cursive;
+        border: 5px solid #d0b987;
+        border-radius: 5px;
+        box-shadow:
+          inset 0 0 0 2px #715e3e,
+          0 12px 24px rgba(16, 26, 22, 0.22);
+      }
+
+      .bistro .app::before {
+        opacity: 0.3;
+        background:
+          radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.22) 0 0.55px, transparent 0.8px),
+          radial-gradient(circle at 82% 71%, rgba(255, 255, 255, 0.17) 0 0.45px, transparent 0.7px);
+        background-size: 19px 21px, 13px 15px;
+      }
+
+      .bistro .app-header {
+        border-bottom: 2px dashed var(--line);
+        background: transparent;
+      }
+
+      .bistro .app-brand {
+        font-size: 27px;
+        letter-spacing: -0.025em;
+        transform: rotate(-1deg);
+      }
+
+      .bistro .app-brand small {
+        color: var(--accent);
+        font-family: "DM Sans", sans-serif;
+      }
+
+      .bistro .sound-button,
+      .bistro .seat,
+      .bistro .clue,
+      .bistro .invite-code,
+      .bistro .leave-button {
+        border-style: dashed;
+      }
+
+      .bistro .clue {
+        border-width: 2px;
+        border-radius: 4px 10px 4px 8px;
+        background: rgba(255, 255, 255, 0.025);
+      }
+
+      .bistro .clue.is-current {
+        color: var(--accent-ink);
+        background: var(--accent);
+        transform: rotate(-1.2deg) scale(1.02);
+      }
+
+      .bistro .round-title,
+      .bistro .room-title {
+        font-size: 31px;
+        line-height: 0.9;
+      }
+
+      .bistro .answer-input,
+      .bistro .answer-menu {
+        border-color: #d0b987;
+      }
+
+      .bistro .copy-button {
+        border-radius: 4px 10px 4px 9px;
+        transform: rotate(-0.6deg);
+      }
+
+      /* Direction 03: Retro Diner */
+      .diner .app {
+        --canvas: #f8d9d3;
+        --surface: #fff5df;
+        --surface-2: #a9ded9;
+        --ink: #183c4b;
+        --muted: #677477;
+        --line: #183c4b;
+        --accent: #e64535;
+        --accent-ink: #fff8e8;
+        --success: #148c84;
+        --field: #fffdf5;
+        --font-ui: "DM Sans", sans-serif;
+        --font-display: "Barlow Condensed", sans-serif;
+        border: 3px solid var(--ink);
+        border-radius: 18px;
+        box-shadow: 9px 9px 0 var(--accent);
+      }
+
+      .diner .app::before {
+        opacity: 0.35;
+        background:
+          radial-gradient(circle, #e64535 0 1px, transparent 1.5px);
+        background-position: 7px 7px;
+        background-size: 22px 22px;
+      }
+
+      .diner .app-header {
+        border-bottom: 3px solid var(--ink);
+        background: #8fd2ce;
+      }
+
+      .diner .app-brand {
+        font-size: 23px;
+        font-style: italic;
+        letter-spacing: 0.015em;
+        text-transform: uppercase;
+      }
+
+      .diner .app-brand small {
+        padding: 3px 5px;
+        border-radius: 10px;
+        color: var(--accent-ink);
+        background: var(--accent);
+        font-family: "DM Sans", sans-serif;
+      }
+
+      .diner .sound-button,
+      .diner .answer-input,
+      .diner .answer-menu,
+      .diner .invite-code,
+      .diner .leave-button {
+        border-width: 2px;
+        border-color: var(--ink);
+        border-radius: 10px;
+      }
+
+      .diner .clue,
+      .diner .seat {
+        border: 2px solid var(--ink);
+        border-radius: 12px;
+        box-shadow: 2px 2px 0 var(--ink);
+      }
+
+      .diner .clue.is-current {
+        transform: translate(-1px, -2px);
+        box-shadow: 4px 5px 0 var(--ink);
+      }
+
+      .diner .round-title,
+      .diner .room-title {
+        font-size: 28px;
+        font-style: italic;
+        text-transform: uppercase;
+      }
+
+      .diner .timer-track,
+      .diner .timer-fill,
+      .diner .score-dots i {
+        border-radius: 999px;
+      }
+
+      .diner .copy-button {
+        border: 2px solid var(--ink);
+        border-radius: 999px;
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+
+      /* Direction 04: Stainless Kitchen */
+      .stainless .app {
+        --canvas: #dfe5e7;
+        --surface: #f7fafb;
+        --surface-2: #cbd4d8;
+        --ink: #142b35;
+        --muted: #62747c;
+        --line: #9eacb2;
+        --accent: #146ef5;
+        --accent-ink: #ffffff;
+        --success: #168a62;
+        --field: #ffffff;
+        --font-ui: "Space Grotesk", sans-serif;
+        --font-display: "Space Grotesk", sans-serif;
+        border: 1px solid #8c9ba1;
+        border-radius: 0;
+        background:
+          linear-gradient(105deg, rgba(255, 255, 255, 0.58), transparent 35%),
+          linear-gradient(90deg, #d8dfe2, #f3f6f7 48%, #ced7da);
+        box-shadow: 0 14px 28px rgba(36, 52, 58, 0.16);
+      }
+
+      .stainless .app::before {
+        background: repeating-linear-gradient(
+          0deg,
+          rgba(38, 62, 71, 0.025) 0,
+          rgba(38, 62, 71, 0.025) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+      }
+
+      .stainless .app-header {
+        border-bottom: 0;
+        color: #fff;
+        background: #142b35;
+      }
+
+      .stainless .app-brand {
+        letter-spacing: -0.05em;
+      }
+
+      .stainless .app-brand small {
+        color: #75a9ff;
+      }
+
+      .stainless .sound-button {
+        border-color: #60747d;
+        color: #c8d3d7;
+      }
+
+      .stainless .clue,
+      .stainless .seat,
+      .stainless .invite-code,
+      .stainless .answer-input,
+      .stainless .answer-menu,
+      .stainless .copy-button,
+      .stainless .leave-button {
+        border-radius: 0;
+      }
+
+      .stainless .clue {
+        border: 0;
+        border-top: 3px solid var(--line);
+        background: rgba(247, 250, 251, 0.78);
+        box-shadow: inset 0 0 0 1px rgba(84, 103, 111, 0.24);
+      }
+
+      .stainless .clue.is-current {
+        border-top-color: #ffb526;
+        background: var(--accent);
+      }
+
+      .stainless .timer-fill {
+        background: linear-gradient(90deg, var(--accent), #56a1ff);
+      }
+
+      .stainless .round-eyebrow,
+      .stainless .room-eyebrow,
+      .stainless .answer-label,
+      .stainless .player-status {
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      /* Direction 05: Midnight Kitchen */
+      .midnight .app {
+        --canvas: #090e19;
+        --surface: #111a2a;
+        --surface-2: #1a2639;
+        --ink: #f6f4ee;
+        --muted: #98a5b7;
+        --line: #2f3c51;
+        --accent: #ffb20f;
+        --accent-ink: #171104;
+        --success: #50dfa4;
+        --field: #0e1725;
+        --field-ink: #f7f5ee;
+        --font-ui: "Space Grotesk", sans-serif;
+        --font-display: "Space Grotesk", sans-serif;
+        border: 1px solid #26334a;
+        border-radius: 20px;
+        box-shadow:
+          0 20px 45px rgba(5, 8, 15, 0.42),
+          0 0 0 1px rgba(132, 104, 255, 0.08);
+      }
+
+      .midnight .app::before {
+        opacity: 0.5;
+        background:
+          radial-gradient(circle at 10% 0, rgba(132, 104, 255, 0.23), transparent 28%),
+          radial-gradient(circle at 94% 38%, rgba(80, 223, 164, 0.12), transparent 25%);
+      }
+
+      .midnight .app-header {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+        background: rgba(17, 26, 42, 0.72);
+        backdrop-filter: blur(12px);
+      }
+
+      .midnight .app-brand::before {
+        width: 8px;
+        height: 8px;
+        border-radius: 3px;
+        content: "";
+        background: var(--accent);
+        box-shadow: 0 0 14px rgba(255, 178, 15, 0.8);
+        transform: rotate(45deg);
+      }
+
+      .midnight .clue,
+      .midnight .seat {
+        border-color: rgba(255, 255, 255, 0.1);
+        border-radius: 11px;
+        background: rgba(17, 26, 42, 0.8);
+        box-shadow: 0 8px 16px rgba(4, 7, 13, 0.2);
+      }
+
+      .midnight .clue.is-current {
+        border-color: rgba(255, 178, 15, 0.7);
+        background: linear-gradient(135deg, #ffb20f, #ffd36a);
+        box-shadow: 0 0 22px rgba(255, 178, 15, 0.23);
+      }
+
+      .midnight .answer-input,
+      .midnight .answer-menu,
+      .midnight .invite-code,
+      .midnight .leave-button,
+      .midnight .sound-button {
+        border-color: rgba(255, 255, 255, 0.13);
+        border-radius: 9px;
+      }
+
+      .midnight .copy-button {
+        border-radius: 9px;
+        box-shadow: 0 0 24px rgba(255, 178, 15, 0.17);
+      }
+
+      .midnight .timer-track,
+      .midnight .timer-fill,
+      .midnight .score-dots i {
+        border-radius: 999px;
+      }
+
+      .midnight .score-dots i.is-won {
+        box-shadow: 0 0 8px rgba(255, 178, 15, 0.48);
+      }
+
+      /* Direction 06: Editorial Cookbook */
+      .editorial .app {
+        --canvas: #ede3d3;
+        --surface: #fbf6eb;
+        --surface-2: #ded3c2;
+        --ink: #171d3f;
+        --muted: #736d63;
+        --line: #aaa08f;
+        --accent: #e3462f;
+        --accent-ink: #fffaf1;
+        --success: #28705b;
+        --field: #fffaf1;
+        --font-ui: "Libre Franklin", sans-serif;
+        --font-display: "Fraunces", Georgia, serif;
+        border: 0;
+        border-radius: 0;
+        box-shadow: 0 12px 36px rgba(43, 34, 21, 0.17);
+      }
+
+      .editorial .app::before {
+        background:
+          linear-gradient(90deg, transparent 0 71%, rgba(23, 29, 63, 0.045) 71% 71.2%, transparent 71.2%),
+          linear-gradient(rgba(23, 29, 63, 0.025) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 24px;
+      }
+
+      .editorial .app-header {
+        min-height: 67px;
+        border-bottom: 5px solid var(--ink);
+        background: var(--surface);
+      }
+
+      .editorial .app-brand {
+        font-size: 22px;
+        font-weight: 600;
+      }
+
+      .editorial .app-brand small {
+        padding-left: 7px;
+        border-left: 1px solid var(--line);
+        font-family: "Libre Franklin", sans-serif;
+      }
+
+      .editorial .round-heading {
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--ink);
+      }
+
+      .editorial .round-title,
+      .editorial .room-title {
+        font-weight: 600;
+      }
+
+      .editorial .clue-grid {
+        gap: 1px;
+        border: 1px solid var(--line);
+        background: var(--line);
+      }
+
+      .editorial .clue {
+        min-height: 67px;
+        border: 0;
+      }
+
+      .editorial .clue.is-current {
+        background: var(--accent);
+      }
+
+      .editorial .answer-input {
+        border-width: 1px;
+        border-color: var(--ink);
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 15px;
+      }
+
+      .editorial .answer-menu,
+      .editorial .invite-code,
+      .editorial .seat,
+      .editorial .leave-button {
+        border-color: var(--ink);
+      }
+
+      .editorial .copy-button {
+        position: relative;
+      }
+
+      .editorial .copy-button::after {
+        position: absolute;
+        right: 12px;
+        content: "+";
+        font-size: 16px;
+        font-weight: 400;
+      }
+
+      .view-game .preview--room,
+      .view-room .preview--game {
+        display: none;
+      }
+
+      .view-game .preview-pair {
+        grid-template-columns: minmax(0, 760px);
+        justify-content: center;
+      }
+
+      .view-room .preview-pair {
+        grid-template-columns: minmax(280px, 420px);
+        justify-content: center;
+      }
+
+      .device-mobile .preview-pair {
+        grid-template-columns: minmax(280px, 390px);
+        justify-content: center;
+      }
+
+      .device-mobile .preview-label .preview-size::after {
+        content: "375 px";
+      }
+
+      .device-mobile .preview-label .preview-size {
+        font-size: 0;
+      }
+
+      .device-mobile .preview-label .preview-size::after {
+        font-size: 9px;
+      }
+
+      .device-mobile .app {
+        min-height: 720px;
+      }
+
+      .device-mobile .app-header {
+        padding-inline: 14px;
+      }
+
+      .device-mobile .game-body {
+        padding: 15px 13px;
+      }
+
+      .device-mobile .clue-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .device-mobile .clue {
+        min-height: 55px;
+      }
+
+      .device-mobile .round-heading {
+        margin-top: 18px;
+      }
+
+      .device-mobile .answer-area {
+        padding-top: 14px;
+      }
+
+      .device-mobile .room-body {
+        padding: 25px 21px 20px;
+      }
+
+      .board-footer {
+        width: min(calc(100% - 48px), var(--board-width));
+        margin: -52px auto 60px;
+        padding-top: 25px;
+        border-top: 1px solid var(--board-line);
+        color: var(--board-muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .board-footer strong {
+        color: var(--board-ink);
+      }
+
+      @media (max-width: 1180px) {
+        .direction {
+          grid-template-columns: 1fr;
+        }
+
+        .direction-notes {
+          display: grid;
+          grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.5fr) minmax(230px, 1fr);
+          gap: 25px;
+          border-right: 0;
+          border-bottom: 1px solid var(--board-line);
+        }
+
+        .direction-index {
+          margin-bottom: 15px;
+        }
+
+        .direction-meta,
+        .palette,
+        .type-note {
+          margin-top: 0;
+        }
+
+        .direction-meta,
+        .type-note {
+          padding-top: 0;
+          border-top: 0;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .board-intro {
+          grid-template-columns: 1fr;
+          gap: 25px;
+        }
+
+        .board-summary {
+          max-width: 700px;
+        }
+
+        .direction-jump {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .board-controls {
+          min-height: 88px;
+        }
+
+        .control-note {
+          display: none;
+        }
+
+        .preview-pair {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .preview--room .app {
+          min-height: 570px;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .board-header,
+        .board-controls,
+        .design-board,
+        .board-footer {
+          width: min(calc(100% - 24px), var(--board-width));
+        }
+
+        .board-header {
+          padding-top: 38px;
+        }
+
+        .board-title {
+          font-size: clamp(46px, 16vw, 72px);
+        }
+
+        .board-facts {
+          grid-template-columns: 1fr;
+        }
+
+        .direction-jump {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .board-controls {
+          padding-block: 9px;
+        }
+
+        .control-groups {
+          width: 100%;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
+        .control-group {
+          display: block;
+        }
+
+        .control-label {
+          display: block;
+          margin-bottom: 5px;
+        }
+
+        .segmented-control button {
+          padding-inline: 9px;
+        }
+
+        .direction-notes {
+          display: block;
+        }
+
+        .direction-meta,
+        .palette,
+        .type-note {
+          margin-top: 23px;
+          padding-top: 18px;
+          border-top: 1px solid var(--board-line);
+        }
+
+        .direction-stage {
+          padding: 10px;
+        }
+
+        .preview-pair,
+        .device-mobile .preview-pair {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .app,
+        .device-mobile .app {
+          min-height: 710px;
+        }
+
+        .clue-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .clue {
+          min-height: 55px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="view-both device-desktop">
+    <header class="board-header">
+      <p class="board-kicker">Guess the Dish / Visual study 01</p>
+      <div class="board-intro">
+        <h1 class="board-title">Six ways to <em>plate</em> the same game.</h1>
+        <p class="board-summary">
+          These are deliberately different starting points, not six finished
+          products. Every route uses the same content and screen structure so
+          palette, type, shape, texture, and tone can be compared fairly.
+        </p>
+      </div>
+
+      <div class="board-facts" aria-label="Comparison constants">
+        <div class="board-fact">
+          <span class="meta-label">Same moment</span>
+          <strong>Round 3, clue 5 of 8</strong>
+        </div>
+        <div class="board-fact">
+          <span class="meta-label">Same interaction</span>
+          <strong>Autocomplete is open</strong>
+        </div>
+        <div class="board-fact">
+          <span class="meta-label">Same second state</span>
+          <strong>Invite room waiting</strong>
+        </div>
+      </div>
+
+      <nav class="direction-jump" id="direction-jump" aria-label="Jump to a visual direction"></nav>
+    </header>
+
+    <div class="board-controls-wrap">
+      <div class="board-controls">
+        <div class="control-groups">
+          <div class="control-group">
+            <span class="control-label">Screen</span>
+            <div class="segmented-control" aria-label="Choose screen preview">
+              <button type="button" data-view="game" aria-pressed="false">Game</button>
+              <button type="button" data-view="room" aria-pressed="false">Room</button>
+              <button type="button" data-view="both" aria-pressed="true">Both</button>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Frame</span>
+            <div class="segmented-control" aria-label="Choose viewport preview">
+              <button type="button" data-device="desktop" aria-pressed="true">Desktop</button>
+              <button type="button" data-device="mobile" aria-pressed="false">Mobile</button>
+            </div>
+          </div>
+        </div>
+        <p class="control-note" aria-live="polite">Showing both screens at desktop width</p>
+      </div>
+    </div>
+
+    <main class="design-board" id="design-board"></main>
+
+    <footer class="board-footer">
+      <strong>How to use this board:</strong> choose the route whose overall
+      personality fits, then freely borrow details from the others. Domain,
+      product rules, and final production UI are intentionally not implied by
+      any one visual treatment.
+    </footer>
+
+    <noscript>This comparison board requires JavaScript to render its six previews.</noscript>
+
+    <script>
+      const themes = [
+        {
+          slug: "ticket",
+          index: "01",
+          name: "Restaurant Ticket",
+          line: "Fast, tactile, and rooted in the rhythm of a working kitchen.",
+          traits: ["Tactile", "Warm", "Mechanic-first"],
+          strong: "Clue hierarchy and immediate comprehension",
+          risk: "Could drift toward point-of-sale software",
+          type: "IBM Plex Mono + DM Sans",
+          colors: [
+            ["Paper", "#FFF8EA"],
+            ["Kraft", "#EFE5D4"],
+            ["Ink", "#25221D"],
+            ["Paprika", "#D84A32"],
+            ["Herb", "#47725A"]
+          ]
+        },
+        {
+          slug: "bistro",
+          index: "02",
+          name: "Bistro Chalkboard",
+          line: "Handmade hospitality with the intimacy of a neighborhood menu.",
+          traits: ["Handmade", "Social", "Food-forward"],
+          strong: "Warmth, charm, and a strong cooking identity",
+          risk: "Handwritten details can hurt scan speed",
+          type: "Caveat + DM Sans",
+          colors: [
+            ["Board", "#17352D"],
+            ["Chalk", "#F7EDDA"],
+            ["Brass", "#D0B987"],
+            ["Saffron", "#F1C453"],
+            ["Coral", "#EF725D"]
+          ]
+        },
+        {
+          slug: "diner",
+          index: "03",
+          name: "Retro Diner",
+          line: "A bright, friendly game-night personality with confident nostalgia.",
+          traits: ["Playful", "Familiar", "High-energy"],
+          strong: "Broad appeal and memorable social sharing",
+          risk: "Novelty can overpower the food knowledge",
+          type: "Barlow Condensed + DM Sans",
+          colors: [
+            ["Cream", "#FFF5DF"],
+            ["Blush", "#F8D9D3"],
+            ["Navy", "#183C4B"],
+            ["Ketchup", "#E64535"],
+            ["Aqua", "#8FD2CE"]
+          ]
+        },
+        {
+          slug: "stainless",
+          index: "04",
+          name: "Stainless Kitchen",
+          line: "Precise, fast, and competitive, like a modern professional pass.",
+          traits: ["Technical", "Focused", "Competitive"],
+          strong: "Information density and real-time credibility",
+          risk: "Can feel cold or overly serious",
+          type: "Space Grotesk + IBM Plex Mono",
+          colors: [
+            ["Steel", "#DFE5E7"],
+            ["White", "#F7FAFB"],
+            ["Carbon", "#142B35"],
+            ["Signal", "#146EF5"],
+            ["Amber", "#FFB526"]
+          ]
+        },
+        {
+          slug: "midnight",
+          index: "05",
+          name: "Midnight Kitchen",
+          line: "A polished after-dark multiplayer world with restrained game energy.",
+          traits: ["Immersive", "Digital", "Night mode"],
+          strong: "Competitive atmosphere and long-session comfort",
+          risk: "May resemble a generic gaming product",
+          type: "Space Grotesk",
+          colors: [
+            ["Night", "#090E19"],
+            ["Slate", "#111A2A"],
+            ["Ivory", "#F6F4EE"],
+            ["Saffron", "#FFB20F"],
+            ["Mint", "#50DFA4"]
+          ]
+        },
+        {
+          slug: "editorial",
+          index: "06",
+          name: "Editorial Cookbook",
+          line: "Cultured and food-obsessed, borrowing confidence from print publishing.",
+          traits: ["Premium", "Editorial", "Distinctive"],
+          strong: "Dish storytelling and an ownable brand voice",
+          risk: "Competition can feel quieter than the other routes",
+          type: "Fraunces + Libre Franklin",
+          colors: [
+            ["Stock", "#FBF6EB"],
+            ["Oat", "#EDE3D3"],
+            ["Blue ink", "#171D3F"],
+            ["Tomato", "#E3462F"],
+            ["Parsley", "#28705B"]
+          ]
+        }
+      ];
+
+      const clues = [
+        ["01", "Ground beef", "revealed"],
+        ["02", "Tomato", "revealed"],
+        ["03", "Red wine", "revealed"],
+        ["04", "Carrot", "revealed"],
+        ["05", "Celery", "current"],
+        ["06", "?", "hidden"],
+        ["07", "?", "hidden"],
+        ["08", "?", "hidden"]
+      ];
+
+      function appHeader() {
+        return `
+          <header class="app-header">
+            <div class="app-brand">Guess the Dish <small>Live</small></div>
+            <button class="sound-button" type="button" aria-pressed="true" aria-label="Mute preview sound">
+              <span class="sound-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span>Sound</span>
+            </button>
+          </header>
+        `;
+      }
+
+      function gamePreview(theme) {
+        const clueMarkup = clues.map(([number, name, state]) => `
+          <div class="clue is-${state}">
+            <span class="clue-number">${number}</span>
+            <span class="clue-name">${name}</span>
+          </div>
+        `).join("");
+
+        return `
+          <article class="preview preview--game" aria-label="${theme.name} game preview">
+            <div class="preview-label">
+              <span>Live round</span>
+              <span class="preview-size">Flexible desktop</span>
+            </div>
+            <div class="app">
+              ${appHeader()}
+              <div class="game-body">
+                <section class="scoreboard" aria-label="Match score is one to one">
+                  <div class="player">
+                    <div class="avatar">RA</div>
+                    <div class="player-info">
+                      <span class="player-name">You</span>
+                      <span class="player-status"><i class="connection-dot"></i>Ready</span>
+                      <span class="score-dots" aria-label="One round won"><i class="is-won"></i><i></i><i></i></span>
+                    </div>
+                  </div>
+                  <span class="versus">VS</span>
+                  <div class="player is-opponent">
+                    <div class="avatar">KM</div>
+                    <div class="player-info">
+                      <span class="player-name">KitchenMage</span>
+                      <span class="player-status"><i class="connection-dot"></i>Thinking</span>
+                      <span class="score-dots" aria-label="One round won"><i class="is-won"></i><i></i><i></i></span>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="round-heading">
+                  <div>
+                    <span class="round-eyebrow">Round 3 / First to 3</span>
+                    <h3 class="round-title">Name that dish</h3>
+                  </div>
+                  <div class="next-clue">Next ingredient<strong>1.8s</strong></div>
+                </div>
+                <div class="timer-track" aria-hidden="true"><div class="timer-fill"></div></div>
+
+                <section class="clue-grid" aria-label="Five of eight ingredients revealed">
+                  ${clueMarkup}
+                </section>
+
+                <section class="answer-area">
+                  <label class="answer-label">
+                    <span>Your answer</span>
+                    <span>Static dish catalog</span>
+                  </label>
+                  <div class="answer-input-wrap">
+                    <input class="answer-input" value="bolog" aria-label="Search dishes" spellcheck="false">
+                    <span class="enter-key">Enter</span>
+                  </div>
+                  <div class="answer-menu" aria-label="Suggested dishes">
+                    <button class="answer-option is-active" type="button">
+                      <span>Spaghetti Bolognese</span><span class="option-hint">Submit</span>
+                    </button>
+                    <button class="answer-option" type="button">
+                      <span>Ragu alla Bolognese</span><span class="option-hint">Dish</span>
+                    </button>
+                    <button class="answer-option" type="button">
+                      <span>Bolognese Lasagne</span><span class="option-hint">Dish</span>
+                    </button>
+                  </div>
+                  <p class="game-footnote">A wrong choice locks your input for 0.75 seconds.</p>
+                </section>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function roomPreview(theme) {
+        return `
+          <article class="preview preview--room" aria-label="${theme.name} invite room preview">
+            <div class="preview-label">
+              <span>Invite room</span>
+              <span class="preview-size">Narrow panel</span>
+            </div>
+            <div class="app">
+              ${appHeader()}
+              <div class="room-body">
+                <span class="room-eyebrow">Private room / 7KQ4</span>
+                <h3 class="room-title">Table for two</h3>
+                <p class="room-copy">Send the link to your opponent. The match starts when they take the open seat.</p>
+
+                <div class="seats" aria-label="Room seats">
+                  <div class="seat">
+                    <div class="seat-avatar">RA</div>
+                    <span class="seat-name">You</span>
+                    <span class="seat-status">Host / Ready</span>
+                  </div>
+                  <div class="seat is-empty">
+                    <div class="seat-avatar">+</div>
+                    <span class="seat-name">Open seat</span>
+                    <span class="seat-status">Waiting</span>
+                  </div>
+                  <span class="table-mark" aria-hidden="true">1v1</span>
+                </div>
+
+                <div class="invite-section">
+                  <span class="invite-label">Share this room</span>
+                  <div class="invite-code">guessthedish.com/room/7KQ4-PM</div>
+                  <button class="copy-button" type="button">Copy invite link</button>
+                </div>
+
+                <p class="room-note">Private rooms wait for your guest and never fill with a bot.</p>
+                <button class="leave-button" type="button">Leave room</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function themeSection(theme) {
+        const palette = theme.colors.map(([name, color]) => `
+          <div class="swatch">
+            <span class="swatch-color" style="--swatch: ${color}"></span>
+            <span class="swatch-name">${name}</span>
+            <span class="swatch-code">${color}</span>
+          </div>
+        `).join("");
+
+        const traits = theme.traits.map((trait) => `<span class="trait">${trait}</span>`).join("");
+
+        return `
+          <section class="direction ${theme.slug}" id="${theme.slug}">
+            <aside class="direction-notes">
+              <div>
+                <span class="direction-index">Direction ${theme.index} / 06</span>
+                <h2 class="direction-name">${theme.name}</h2>
+                <p class="direction-line">${theme.line}</p>
+                <div class="direction-traits">${traits}</div>
+              </div>
+
+              <div class="direction-meta">
+                <div class="meta-row">
+                  <span class="meta-label">Strong at</span>
+                  <span class="meta-value">${theme.strong}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Watch for</span>
+                  <span class="meta-value">${theme.risk}</span>
+                </div>
+                <div class="type-note">
+                  <span class="meta-label">Type direction</span>
+                  <strong>${theme.type}</strong>
+                </div>
+              </div>
+
+              <div class="palette">
+                <p class="palette-title">Working palette</p>
+                ${palette}
+              </div>
+            </aside>
+
+            <div class="direction-stage">
+              <div class="preview-pair">
+                ${gamePreview(theme)}
+                ${roomPreview(theme)}
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+      const board = document.querySelector("#design-board");
+      const jump = document.querySelector("#direction-jump");
+      board.innerHTML = themes.map(themeSection).join("");
+      jump.innerHTML = themes.map((theme) => `
+        <a class="jump-link" href="#${theme.slug}">
+          <span class="jump-colors" aria-hidden="true">
+            <i style="--jump-color: ${theme.colors[0][1]}"></i>
+            <i style="--jump-color: ${theme.colors[3][1]}"></i>
+          </span>
+          <span>${theme.name}</span>
+        </a>
+      `).join("");
+
+      const body = document.body;
+      const controlNote = document.querySelector(".control-note");
+
+      document.querySelectorAll("[data-view]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const view = button.dataset.view;
+          body.classList.remove("view-game", "view-room", "view-both");
+          body.classList.add(`view-${view}`);
+          document.querySelectorAll("[data-view]").forEach((candidate) => {
+            candidate.setAttribute("aria-pressed", String(candidate === button));
+          });
+          updateControlNote();
+        });
+      });
+
+      document.querySelectorAll("[data-device]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const device = button.dataset.device;
+          body.classList.remove("device-desktop", "device-mobile");
+          body.classList.add(`device-${device}`);
+          document.querySelectorAll("[data-device]").forEach((candidate) => {
+            candidate.setAttribute("aria-pressed", String(candidate === button));
+          });
+          updateControlNote();
+        });
+      });
+
+      function updateControlNote() {
+        const view = document.querySelector("[data-view][aria-pressed='true']").textContent.toLowerCase();
+        const device = document.querySelector("[data-device][aria-pressed='true']").textContent.toLowerCase();
+        controlNote.textContent = `Showing ${view} screen${view === "both" ? "s" : ""} at ${device} width`;
+      }
+
+      document.querySelectorAll(".copy-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const original = "Copy invite link";
+          button.textContent = "Link copied";
+          button.classList.add("is-copied");
+          window.setTimeout(() => {
+            button.textContent = original;
+            button.classList.remove("is-copied");
+          }, 1300);
+        });
+      });
+
+      document.querySelectorAll(".sound-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const isOn = button.getAttribute("aria-pressed") === "true";
+          button.setAttribute("aria-pressed", String(!isOn));
+          button.setAttribute("aria-label", isOn ? "Enable preview sound" : "Mute preview sound");
+          button.querySelector("span:last-child").textContent = isOn ? "Muted" : "Sound";
+        });
+      });
+
+      document.querySelectorAll(".answer-option").forEach((button) => {
+        button.addEventListener("click", () => {
+          const menu = button.closest(".answer-menu");
+          menu.querySelectorAll(".answer-option").forEach((option) => {
+            option.classList.toggle("is-active", option === button);
+          });
+          button.closest(".answer-area").querySelector(".answer-input").value = button.querySelector("span").textContent;
+        });
+      });
+    </script>
+  </body>
+</html>
