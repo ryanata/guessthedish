@@ -1,12 +1,6 @@
 # Guess the Dish
 
-Provisional product and interaction specification, version 0.1.
-
-This document captures the current direction for the prototype. It is a
-starting point for critique, playtesting, and revision rather than a final
-contract. Items marked **Prototype default** are intentionally easy to change.
-
-## Product Summary
+## Overview
 
 Guess the Dish is a fast, one-versus-one web game. A dish's ingredients are
 revealed one at a time, and players race to identify the dish by selecting an
@@ -14,21 +8,6 @@ answer from a fixed culinary catalog.
 
 The central decision is whether to guess early with incomplete information or
 wait for a more distinctive ingredient and risk losing the race.
-
-## Product Principles
-
-- **Understandable immediately.** A new player should understand the game by
-  watching one round.
-- **Knowledge over loopholes.** Winning should come from recognizing a dish,
-  not exploiting fuzzy free-text adjudication or spamming answers.
-- **Fast recovery.** Wrong guesses matter without taking a player out of the
-  round for long.
-- **Symmetric competition.** Both players see the same clues in the same order
-  at the same server-controlled times.
-- **Short sessions.** A complete match should fit comfortably into a casual
-  break.
-- **No empty multiplayer.** Quick Play can be filled by a bot so the prototype
-  remains playable with a small audience.
 
 ## Terminology
 
@@ -41,91 +20,58 @@ wait for a more distinctive ingredient and risk losing the race.
 - **Match:** A sequence of rounds until one player wins three rounds.
 - **Room:** A temporary match lobby reached through an invite URL.
 
-## Match Format
+## Core Rules
 
 - Matches are one versus one.
 - The first player to win three rounds wins the match.
-- A round win awards one point.
-- An unsolved round awards no point to either player.
-- Unsolved rounds do not advance either player's score; the match continues
-  with a new puzzle.
+- A correct answer wins the round and awards one point.
+- An unsolved round awards no point; the match continues with a new puzzle.
 - A puzzle must not repeat within a match.
-- The first correct answer accepted by the authoritative game server ends the
-  round immediately.
-- There is no grace window or tied round in the prototype.
-
-### Prototype Defaults
-
-- Three-second countdown before each round.
-- Four-second result state between rounds.
+- The server determines which correct answer arrived first and ends the round
+  immediately.
+- There is no grace window or tied round.
 - A match result remains visible until the player chooses to play again or
   leave.
 
-## Round And Ingredient Timing
+## Clues And Timing
 
-Puzzles may contain different numbers of displayed ingredient clues. They are
-not forced into a seven-clue template.
+Puzzles may contain different numbers of displayed ingredient clues.
 
 - Minimum puzzle size: four ingredients.
-- **Prototype default:** maximum puzzle size: twelve ingredients.
-- Every revealed ingredient remains visible for the rest of the round.
-- The first ingredient appears at `GO`.
-- Ingredients are curated from less identifying to more identifying.
-- Both players receive exactly the same reveal order and schedule.
-- Each clue shows an ingredient label only, not its quantity.
-- Preparation may be part of the label only when it changes the ingredient's
-  identity in a meaningful way, for example `roasted red pepper`.
+- Maximum puzzle size: twelve ingredients.
+- Each clue shows an ingredient label without its quantity. Preparation may be
+  included when it changes the ingredient's identity, such as `roasted red
+  pepper`.
+- Both players receive the same reveal order and server-controlled schedule.
+- The first ingredient appears at `GO`; revealed ingredients remain visible.
 
 Let:
 
 - `N` be the number of ingredients in the puzzle.
 - `K = ceil(N * 0.25)` be the number of early clues.
 
-Timing:
-
-- After each of the first `K` reveals, wait two seconds before revealing the
-  next ingredient.
-- After each remaining reveal, wait three seconds before revealing the next
-  ingredient.
+- Wait two seconds after each of the first `K` reveals and three seconds after
+  each remaining reveal.
 - After the final ingredient, leave a final three-second answer window.
-- If nobody answers correctly by the end of that window, reveal the dish and
-  award no point.
-
-The final clue's three-second answer window is included in the maximum round
-times below.
-
-| Ingredient count | Early clues (`K`) | Maximum round length |
-| ---: | ---: | ---: |
-| 4 | 1 | 11 seconds |
-| 5 | 2 | 13 seconds |
-| 7 | 2 | 19 seconds |
-| 8 | 2 | 22 seconds |
-| 10 | 3 | 27 seconds |
-| 12 | 3 | 33 seconds |
-
-The formula and maximum should be playtested. Long recipes may eventually use
-a curated subset rather than every source ingredient.
+- If nobody answers correctly, reveal the dish and award no point.
 
 ## Answering
 
 Players do not submit arbitrary prose. They search and select from a static
 catalog of valid dishes.
 
-### Search And Selection
+### Search
 
 - Search begins after two typed characters.
-- Show at most five results.
+- At most five results appear.
 - Search covers canonical dish names and aliases.
-- Search never considers ingredient lists or semantic similarity.
 - Results always display the canonical dish name.
-- A selected result is submitted immediately.
-- Pressing `Enter` submits the highlighted result, or the first result when
-  none is highlighted.
-- Arrow keys move through results.
+- Selecting a result submits it immediately.
+- The first result is highlighted by default. Arrow keys change the selection,
+  and `Enter` submits it.
 - Freeform text that does not resolve to a catalog entry cannot be submitted.
-- Exact aliases rank ahead of partial matches.
-- Conservative typo matching is permitted, but it must still resolve to a
-  static catalog entry.
+- Exact aliases rank ahead of partial matches. Conservative typo matching must
+  still resolve to a catalog entry.
 
 Example:
 
@@ -136,116 +82,91 @@ Spaghetti Bolognese
 Ragù alla Bolognese
 ```
 
+### Visible Guesses
+
+- Every submitted catalog answer appears in a compact speech bubble above the
+  submitting player's identity.
+- Both players see bubbles for their own guesses and their opponent's guesses.
+- The bubble displays the selected dish's canonical name, even when the player
+  found it through an alias.
+- A bubble remains visible for two seconds. A new guess replaces it and
+  restarts the display time.
+- An incorrect guess remains visible while its 750 ms input lock runs.
+- A correct guess remains visible through the transition into the round result.
+- Bots use the same behavior. Bubbles never contain freeform text and are not a
+  chat system.
+- Bubbles must not obscure ingredients, timers, or answer controls.
+
 ### Wrong Answers
 
 - An incorrect submission locks that player's answer control for 750 ms.
 - The lock does not pause ingredient reveals.
-- The rejected dish cannot be submitted again during that round.
-- Previously rejected results may remain visible but should be visibly marked
-  and disabled.
-- The opponent's guesses remain hidden during the round.
+- Previously rejected dishes remain selectable and may be submitted again.
 
-### Correct Answers
+## Puzzle Content
 
-- The server, not the browser, determines which correct answer arrived first.
-- The first accepted correct answer ends the round for both players.
-- The result state identifies the winner and the ingredient number visible
-  when the answer was accepted.
-
-## Puzzle Content Model
-
-Each puzzle is curated rather than generated directly from an arbitrary source
-recipe.
-
-Required fields:
+Each puzzle is curated rather than generated directly from an arbitrary source recipe.
 
 - Stable puzzle identifier.
 - Canonical dish identifier and display name.
 - Searchable aliases.
-- At least four ordered ingredient clues.
+- Ordered ingredient clues.
 - Internal difficulty rating.
 - Content status such as `draft`, `reviewed`, or `retired`.
-
-Optional fields:
-
-- Cuisine or region.
-- Dish photograph and attribution.
-- Short post-round context.
-- Source references for editorial review.
+- Optional cuisine, region, dish photograph, and attribution.
 
 ### Content Guidelines
 
-- A clue set should converge on a conventional named dish rather than only a
-  broad category.
-- Generic ingredients should normally appear before distinctive ingredients.
-- A highly revealing eponymous or specialty ingredient should not appear first
-  unless the puzzle is intentionally easy.
+- A clue set should converge on a conventional named dish rather than a broad
+  category.
+- Order ingredients from less identifying to more identifying. A highly
+  revealing ingredient should not appear first unless the puzzle is easy.
 - Salt, water, neutral oil, and similar pantry defaults may be omitted when
   they add no useful signal.
-- Variants should be separate answers only when their clue sets meaningfully
-  distinguish them.
-- Aliases are equivalences, not broad descriptions. `Spag bol` can resolve to
-  `Spaghetti Bolognese`; `pasta with meat sauce` should not.
-- Frequently disputed or poorly performing puzzles should be revised or
-  retired.
+- Treat variants as separate answers only when their clues distinguish them.
+- Aliases are equivalent names, not descriptions: `Spag bol` may resolve to
+  `Spaghetti Bolognese`; `pasta with meat sauce` may not.
+- Revise or retire frequently disputed puzzles.
 
 ## Play Modes
 
+Players use guest names; accounts, friend lists, and social graphs are not
+required.
+
 ### Quick Play
 
-1. The player supplies or accepts a generated guest name.
-2. The player selects **Quick Play**.
-3. The system searches for a compatible waiting player.
-4. **Prototype default:** if no player is available after three seconds, a bot
-   fills the opposing seat.
-5. The match begins when both seats are ready.
-
-Bots should use the revealed information, plausible reaction delays, and a
-configurable skill profile. They should not merely know the answer and wait a
-fixed random duration. Whether bots are visually identified is an open product
-question.
+- **Quick Play** searches for a waiting player and starts when both seats are
+  ready.
+- If no player is available after three seconds, a bot fills the opposing seat.
+- Bots use revealed clues, plausible reaction times, and configurable skill
+  profiles rather than knowing the answer and waiting arbitrarily.
+- Bots receive generated player-like names and are not explicitly labeled.
 
 ### Invite Room
 
-1. The host selects **Create Room**.
-2. The system creates a temporary room and shareable invite URL.
-3. The host can copy the URL while waiting.
-4. The first valid guest to open or join through the URL claims the second
-   player seat.
-5. The match starts automatically after both players are connected and ready.
-6. A third visitor sees a clear **Room full** state.
-7. Private rooms do not receive automatic bot fill.
-8. After a match, both players may opt into a rematch in the same room.
+- **Create Room** generates a temporary room with an unguessable invite URL the
+  host can copy.
+- The first guest to join claims the second seat; both players being ready
+  starts the match automatically.
+- A third visitor sees **Room full**.
+- Invite rooms do not use bot fill and support rematches in the same room.
 
-No account, friend list, or social graph is required. Room URLs should be
-unguessable and temporary.
+### Reconnection
 
-### Reconnection Defaults
+- A disconnected player's seat remains reserved for 10 seconds while the round
+  timeline continues.
+- A returning client catches up to the current state.
+- After 10 seconds, the remaining player wins by forfeit.
 
-- A brief disconnect does not immediately forfeit the match.
-- **Prototype default:** reserve the player's seat for 15 seconds.
-- The authoritative round timeline continues during disconnection.
-- If the player returns in time, the client catches up to the current state.
-- If the player does not return, the remaining player wins the match by
-  forfeit.
-
-## Screen Specifications
+## Screens
 
 ### Home
-
-Purpose: explain the premise and get the player into a match with minimal
-friction.
-
-Required elements:
 
 - Guess the Dish wordmark.
 - One-sentence explanation.
 - Editable guest display name.
 - Primary **Quick Play** action.
 - Secondary **Create Room** action.
-- Compact how-to-play demonstration.
-
-No account is required.
 
 ### Quick Play Matchmaking
 
@@ -258,8 +179,7 @@ No account is required.
 
 - Room identifier or concise waiting label.
 - Host and guest player slots.
-- Shareable URL.
-- **Copy Invite Link** action with confirmation feedback.
+- Shareable URL and **Copy Invite Link** action with confirmation feedback.
 - Leave action.
 - Clear states for expired, invalid, and full rooms.
 
@@ -273,15 +193,11 @@ No account is required.
 - Clear indication of time until the next reveal.
 - Persistent answer search field and autocomplete results.
 - Wrong-answer lock feedback.
-- Mute control.
-
-The active game must not require page scrolling at supported viewport sizes.
 
 ### Round Result
 
-- Canonical dish name.
-- Winning player, or **No one got it**.
-- Ingredient number on which the winning answer was accepted.
+- Canonical dish name and winning player, or **No one got it**.
+- Ingredient number visible when the winning answer was accepted.
 - Full ordered clue sequence.
 - Updated match score.
 - Dish image when available and properly licensed.
@@ -291,52 +207,30 @@ The active game must not require page scrolling at supported viewport sizes.
 
 - Winner and final score.
 - Round-by-round summary.
-- **Play Again** for Quick Play.
-- Rematch readiness for invite rooms.
+- **Play Again** for Quick Play or rematch readiness for invite rooms.
 - Leave action.
 
 ## Responsive And Accessible Interaction
 
-- Mobile-first layout with an expanded desktop composition.
-- The game board must fit without scrolling during an active round.
+- The active game uses a mobile-first layout, expands on desktop, and never
+  requires scrolling.
 - On mobile, autocomplete opens upward so results remain visible above the
   software keyboard.
 - Nonessential decoration collapses while the keyboard is open.
-- Touch targets are at least 44 by 44 CSS pixels.
-- The complete game is keyboard operable.
-- Focus states are clearly visible.
-- Status never relies on color alone.
-- Announce new clues, lockouts, round results, and connection changes to
-  assistive technology without repeatedly stealing focus.
-- Respect `prefers-reduced-motion` and provide a mute control.
-- Maintain readable contrast throughout the selected visual system.
-
-## Sound And Motion
-
-Sound and animation should reinforce state changes without delaying play.
-
-Prototype candidates:
-
-- Short cue at `GO`.
-- Quiet tick, stamp, or service-bell cue for each new ingredient.
-- Distinct correct, incorrect, and round-end sounds.
-- A quick entrance animation for a newly revealed clue.
-
-All effects must be optional. Functional timing cannot depend on animation
-completion.
+- Touch targets are at least 44 by 44 CSS pixels. The game is keyboard operable
+  with visible focus states.
+- Status never relies on color alone, and text maintains readable contrast.
+- Announce new clues, submitted guesses, lockouts, round results, and
+  connection changes to assistive technology without repeatedly stealing
+  focus.
+- Respect `prefers-reduced-motion`.
 
 ## Visual System
 
-The selected direction is **Restaurant Ticket**: fast, tactile, warm, and
+The visual direction is **Restaurant Ticket**: fast, tactile, warm, and
 rooted in the rhythm of a working kitchen. It should feel like ink, paper, and
 the practical artifacts of restaurant service rather than a generic trivia
 game.
-
-This decision covers visual primitives only. Screen composition, information
-hierarchy, navigation, responsive arrangement, and interaction layout remain
-deliberately undecided. Future design work should begin from the product
-requirements in this document and must not infer a layout from earlier visual
-explorations or Git history.
 
 ### Palette
 
@@ -366,7 +260,7 @@ another non-color signal.
   service labels; body copy should retain normal casing for readability.
 - Tabular numerals should be used for countdowns and changing numeric values.
 
-The fonts may be self-hosted or loaded as web fonts in the prototype. The
+The fonts may be self-hosted or loaded as web fonts. The
 interface must retain sensible system fallbacks and avoid layout shifts that
 affect gameplay.
 
@@ -385,82 +279,21 @@ affect gameplay.
 - Shadows should resemble offset paper layers rather than diffuse floating
   glass panels.
 
-### Iconography And Motion
+### Icons, Sound, And Motion
 
 - Prefer simple stamped, printed, or utilitarian line icons.
 - Avoid food emoji as core interface iconography.
-- A newly revealed ingredient may enter with a quick ticket-stamp motion.
-- Success feedback may resemble a check stamp using Herb.
-- Motion must remain brief, optional, and independent of authoritative game
-  timing.
+- Use a short cue at `GO`, a quiet tick, stamp, or bell for new ingredients,
+  and distinct correct, incorrect, and round-end sounds.
+- New ingredients may enter with a quick ticket-stamp motion; success may use a
+  check stamp in Herb.
+- Effects are brief and optional, with a mute control. They never determine or
+  delay authoritative game timing.
 
 ### Visual Guardrails
 
 - Do not treat the visual direction as a requirement to imitate point-of-sale
   software.
 - Do not sacrifice scan speed for decorative restaurant realism.
-- Do not mix in unrelated visual motifs unless the visual direction is
-  explicitly reconsidered.
-- Do not use a previous mockup as the basis for screen layout. No visual
-  reference file is intentionally retained in the working tree.
-
-## Prototype Scope
-
-### Included
-
-- Guest identity.
-- One-versus-one Quick Play.
-- Bot fallback for Quick Play.
-- Shareable invite rooms.
-- First-to-three matches.
-- Variable-length, server-timed ingredient reveals.
-- Static answer catalog with aliases and conservative typo matching.
-- Wrong-answer lockouts.
-- Curated initial puzzle set.
-- Synchronized round and result states.
-- Responsive desktop and mobile gameplay.
-- Basic reconnect handling.
-
-### Excluded
-
-- User accounts and persistent profiles.
-- Rankings, matchmaking ratings, and leaderboards.
-- Friend lists or a social graph.
-- Chat and direct messaging.
-- User-authored recipes or puzzles.
-- Daily challenges, achievements, and progression systems.
-- Monetization.
-- General recipe browsing outside the post-round context.
-- Native mobile applications.
-
-## Prototype Success Questions
-
-The prototype should answer these questions before expanding scope:
-
-- Do players understand the game without instruction?
-- Is there meaningful tension between guessing early and waiting?
-- Does autocomplete feel fast, fair, and resistant to answer spam?
-- Is a 750 ms penalty perceptible enough without becoming frustrating?
-- Does the variable timing make short and long recipes feel equally paced?
-- How often do players dispute a puzzle or expected alias?
-- Is first-to-three the right session length?
-- How frequently does a human choose an answer before the final clue?
-- Do invite links produce a smooth two-person start and rematch loop?
-- Can bots fill empty matches without making play feel mechanical?
-
-## Open Decisions
-
-- Screen layouts and information hierarchy within the Restaurant Ticket visual
-  system.
-- Whether Quick Play bots are explicitly labeled.
-- Initial puzzle count and cuisine distribution.
-- Exact typo-matching tolerance.
-- Whether autocomplete should expose already rejected answers or remove them.
-- Whether puzzle difficulty affects matchmaking or remains mixed.
-- Whether the twelve-ingredient maximum is correct.
-- Whether long source recipes should be represented by every meaningful
-  ingredient or a curated subset.
-- Room expiration duration.
-- Host behavior when the invited guest disconnects before a match.
-- Photo sourcing and licensing policy.
-- Content moderation and editorial workflow after the prototype.
+- Keep the Restaurant Ticket motif consistent rather than mixing in unrelated
+  visual styles.
