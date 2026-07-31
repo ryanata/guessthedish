@@ -87,7 +87,7 @@ The answer catalog is safe to expose because it contains the universe of valid
 dishes, not the answer to the current puzzle. Server-side autocomplete would be
 equally enumerable while adding latency. Puzzle-to-answer mappings, future
 clues, and bot decisions never enter browser assets. The server validates every
-submitted dish ID and enforces the 750 ms wrong-answer lock and rate limits.
+submitted dish ID and enforces the 300 ms wrong-answer lock and rate limits.
 
 ## State
 

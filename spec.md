@@ -50,9 +50,9 @@ Let:
 - `N` be the number of ingredients in the puzzle.
 - `K = ceil(N * 0.25)` be the number of early clues.
 
-- Wait two seconds after each of the first `K` reveals and three seconds after
+- Wait five seconds after each of the first `K` reveals and 7.5 seconds after
   each remaining reveal.
-- After the final ingredient, leave a final three-second answer window.
+- After the final ingredient, leave a final 7.5-second answer window.
 - If nobody answers correctly, reveal the dish and award no point.
 
 ## Answering
@@ -70,6 +70,8 @@ catalog of valid dishes.
 - The first result is highlighted by default. Arrow keys change the selection,
   and `Enter` submits it.
 - Freeform text that does not resolve to a catalog entry cannot be submitted.
+- `Tab` from the search input moves into the visible result list, and the search
+  input receives focus automatically at the start of every round.
 - Exact aliases rank ahead of partial matches. Conservative typo matching must
   still resolve to a catalog entry.
 
@@ -91,7 +93,7 @@ Ragù alla Bolognese
   found it through an alias.
 - A bubble remains visible for two seconds. A new guess replaces it and
   restarts the display time.
-- An incorrect guess remains visible while its 750 ms input lock runs.
+- An incorrect guess remains visible while its 300 ms submission lock runs.
 - A correct guess remains visible through the transition into the round result.
 - Bots use the same behavior. Bubbles never contain freeform text and are not a
   chat system.
@@ -99,9 +101,17 @@ Ragù alla Bolognese
 
 ### Wrong Answers
 
-- An incorrect submission locks that player's answer control for 750 ms.
+- An incorrect submission locks that player's submissions for 300 ms without disabling typing.
 - The lock does not pause ingredient reveals.
 - Previously rejected dishes remain selectable and may be submitted again.
+- A rejected answer gives the search control a brief red shake without
+  interrupting typing.
+
+### Round Result
+
+- The round result remains visible for three seconds.
+- A centered card shows the canonical answer and identifies who earned the
+  point, or states that no one got it.
 
 ## Puzzle Content
 
@@ -111,9 +121,41 @@ Each puzzle is curated rather than generated directly from an arbitrary source r
 - Canonical dish identifier and display name.
 - Searchable aliases.
 - Ordered ingredient clues.
-- Internal difficulty rating.
+- Dish family and cuisine, each drawn from a closed vocabulary.
+- Difficulty of `familiar`, `intermediate`, or `challenge`, estimating
+  recognition by a US player rather than cooking effort.
 - Content status such as `draft`, `reviewed`, or `retired`.
-- Optional cuisine, region, dish photograph, and attribution.
+- Optional region, dish photograph, and attribution.
+
+Family, cuisine, and difficulty are server-side only. The answer catalog is
+enumerable by design, so publishing them would let a player filter the list
+down to the current answer.
+
+### Progressive Assistance
+
+Ingredients alone give a player nothing to narrow when they do not recognise a
+dish, so two hints unlock as the round runs:
+
+- The dish family at `ceil(N / 2)` revealed clues.
+- The cuisine at `ceil(N * 0.75)` revealed clues.
+
+Both are withheld by the server until earned, never sent early and hidden by
+the client. Before unlocking, each slot shows `?`. Both are shown once the
+round ends, since the answer is already on screen.
+
+Assistance stops there. First-letter and word-length hints turn recall into a
+spelling exercise and are deliberately excluded.
+
+### Difficulty And The Match Deck
+
+Roughly a quarter of the catalog is rated `challenge`. An unweighted shuffle
+therefore deals two or more hard dishes to about half of all five-round
+matches, which reads as arbitrary rather than difficult.
+
+Each match instead deals at most one `challenge` dish, placed at a random
+position within the first six rounds. Remaining hard dishes sit behind every
+other puzzle. The deck stays a permutation of the whole catalog, so a long
+match never repeats a dish and never runs out.
 
 ### Content Guidelines
 
@@ -138,8 +180,16 @@ required.
 - **Quick Play** searches for a waiting player and starts when both seats are
   ready.
 - If no player is available after three seconds, a bot fills the opposing seat.
-- Bots use revealed clues, plausible reaction times, and configurable skill
-  profiles rather than knowing the answer and waiting arbitrarily.
+- Each seat is authorized by a separate opaque token returned only when that
+  seat creates or joins the match. Match reads, guesses, and cancellation use
+  that token as an HTTP bearer credential.
+- Canceling a waiting match removes it. For this prototype, leaving an active
+  match also removes the entire match for both players.
+- A bot cannot answer before half the clues are visible. Its cumulative chance
+  of answering correctly is `0.02 + 0.63x^3`, where `x` is progress from the
+  halfway clue to the final clue. This reaches 65% at the final clue, leaving a
+  35% chance that the bot never answers in that round.
+- Once eligible to answer, a bot waits 450-1,200 ms before submitting.
 - Bots receive generated player-like names and are not explicitly labeled.
 
 ### Invite Room
@@ -149,7 +199,10 @@ required.
 - The first guest to join claims the second seat; both players being ready
   starts the match automatically.
 - A third visitor sees **Room full**.
-- Invite rooms do not use bot fill and support rematches in the same room.
+- Invite rooms do not use bot fill and are never eligible for Quick Play
+  matchmaking.
+- The backend prototype retains an inactive room for up to one hour. It does
+  not yet support rematches in the same room.
 
 ### Reconnection
 
