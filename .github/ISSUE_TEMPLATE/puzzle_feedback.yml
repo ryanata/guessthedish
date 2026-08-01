@@ -1,0 +1,32 @@
+name: Puzzle feedback
+description: A dish felt wrong, unfair, or is missing from the catalog
+title: "[Puzzle]: "
+labels: ["content"]
+body:
+  - type: markdown
+    attributes:
+      value: Puzzles are curated by hand, so disputes are useful. Frequently disputed puzzles get revised or retired.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is the problem?
+      options:
+        - The ingredients do not lead to that dish
+        - The ingredients give it away too early
+        - A name or alias I typed should have been accepted
+        - A dish is missing from the catalog
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: dish
+    attributes:
+      label: Which dish?
+      placeholder: Spaghetti Bolognese
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What did you type, what did you expect, and why?
