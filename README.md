@@ -4,63 +4,70 @@
 
 **Ingredients land one by one. Name the dish before your opponent does.**
 
+No account. No install. Type a guest name and you are playing.
+
 ### [▶ Play at guessthedish.com](https://guessthedish.com/)
 
 [Report a bug](https://github.com/ryanata/guessthedish/issues/new?template=bug_report.yml) ·
 [Request a feature](https://github.com/ryanata/guessthedish/issues/new?template=feature_request.yml) ·
-[Argue about a puzzle](https://github.com/ryanata/guessthedish/issues/new?template=puzzle_feedback.yml)
+[Flag a wrong dish](https://github.com/ryanata/guessthedish/issues/new?template=puzzle_feedback.yml)
 
-<img src="docs/media/gameplay.gif" alt="A match of Guess the Dish: ingredients reveal one at a time while both players race to name the dish" width="820">
+<img src="docs/media/gameplay.gif" alt="A round of Guess the Dish: ingredients reveal one at a time, the player types Spaghetti Bolognese, and the round result confirms the point" width="820">
 
 </div>
 
-## What it is
+## The game
 
-Guess the Dish is a fast one-versus-one web game. The server reveals a dish's ingredients one at a
-time, and both players race to identify it from a fixed catalog of dishes.
-
-The whole game is one decision, made over and over: **guess now on thin evidence, or wait for a more
-distinctive ingredient and risk losing the race.** `olive oil, onion, red pepper` could be a hundred
-things. Four clues later it can only be one.
-
-No account, no download, no install. Type a guest name and you are playing.
+Two players, one dish, and a list of ingredients that arrives one item at a time. The whole game is
+a single decision made over and over: **guess now on thin evidence, or wait for a more distinctive
+ingredient and risk losing the race.** `olive oil, onion, red pepper` could be a hundred things.
+Four clues later it can only be one.
 
 ## The rules in ten seconds
 
 - **First to 3 rounds** wins the match.
 - Answers come from a **fixed dish catalog**, so there are no spelling arguments and no typing prose.
   Search, pick, and it submits instantly.
-- Clue reveals are **server-timed and identical for both players**: 5 seconds between the early
-  ingredients, 7.5 seconds later on, plus a final answering window.
+- Clue reveals are **server-timed and identical for both players**, so the race is real: five seconds
+  between the early ingredients, seven and a half later on.
 - A wrong answer costs a **300 ms lockout**. You keep typing, you just lose tempo.
-- Two hints unlock as the clues pile up: the **dish family** halfway through, the **cuisine** three
-  quarters of the way in. That is all the help you get — no first letters, no word lengths.
-- If nobody gets it, the dish is revealed and no point is awarded.
+- Two hints unlock as the clues pile up — the **dish family** halfway through, the **cuisine** three
+  quarters in. No first letters, no word lengths. If nobody gets it, nobody scores.
 
 ## Two ways to play
 
-| **Quick Play** | **Invite a friend** |
-| --- | --- |
-| Matches you with whoever is waiting. If nobody turns up within three seconds, a bot takes the seat so you never sit in an empty lobby. | Creates a private table with an unguessable invite link. Share the link, and the match starts the moment your guest sits down. Bots never fill an invite room. |
-| <img src="docs/media/home.png" alt="Guess the Dish home screen with a guest name field, Quick Play, and Create Room" width="440"> | <img src="docs/media/room.png" alt="Private room screen showing an invite link, the host seat filled, and an empty guest seat" width="440"> |
+**Quick Play** matches you with whoever is waiting. If nobody turns up within three seconds, a bot
+takes the seat, so you never sit in an empty lobby.
+
+<img src="docs/media/home.png" alt="Guess the Dish home screen with a guest name field, Quick Play, and Create Room" width="820">
+
+**Create Room** reserves a private table behind a link nobody can guess. Share it, and the match
+starts the moment your guest sits down — bots never fill an invite room.
+
+<img src="docs/media/room.png" alt="Private room screen showing an invite link, the host seat filled, and an empty guest seat" width="820">
 
 ## A round, in pictures
 
-| Racing the clues | Someone gets it |
-| --- | --- |
-| Ingredients stack up while the timer bar runs. Start typing and the catalog narrows; `Enter` sends the highlighted dish. | The answer, the full ingredient list, and who took the point. Three seconds later the next dish is on the pass. |
-| <img src="docs/media/game.png" alt="Mid-round: two revealed ingredients, hidden family and cuisine hints, and the answer autocomplete open" width="440"> | <img src="docs/media/round-result.png" alt="Round result: the dish is revealed along with every ingredient and the point awarded" width="440"> |
+Ingredients stack up while the timer bar runs down. Start typing and the catalog narrows to the
+dishes that match; `Enter` sends the highlighted one straight to the server.
+
+<img src="docs/media/game.png" alt="Mid-round: revealed ingredients, still-hidden family and cuisine hints, and the answer autocomplete open on a matching dish" width="820">
+
+Whoever lands the right answer first takes the point. The dish, the full ingredient list, and the
+score all land together, and three seconds later the next dish is on the pass.
+
+<img src="docs/media/round-result.png" alt="Round result: the dish is revealed along with every ingredient, the unlocked family and cuisine hints, and the point awarded" width="820">
 
 ## Found a bug? Want something changed?
 
-**This repo is the right place for all of it** — bugs, ideas, and puzzles you think are unfair.
-Issues are read, and a two-line report beats a bug nobody knows about.
+**This repo is the right place for all of it** — bugs, ideas, and dishes you think are unfair. Every
+report gets read, and a two-line note beats a bug nobody knows about.
 
 | I want to... | Do this |
 | --- | --- |
 | Report something broken | [Open a bug report](https://github.com/ryanata/guessthedish/issues/new?template=bug_report.yml) |
 | Suggest a feature or a game-rule change | [Open a feature request](https://github.com/ryanata/guessthedish/issues/new?template=feature_request.yml) |
-| Flag a wrong, unfair, or missing dish | [Open puzzle feedback](https://github.com/ryanata/guessthedish/issues/new?template=puzzle_feedback.yml) |
+| Flag a wrong, unfair, or missing dish | [Open dish feedback](https://github.com/ryanata/guessthedish/issues/new?template=puzzle_feedback.yml) |
 | Ask a question or float an idea first | [Browse existing issues](https://github.com/ryanata/guessthedish/issues) and add to one |
 
 Useful things to include in a bug report: what you expected, what happened, the round or dish it
@@ -110,15 +117,17 @@ with 4–12 clues:
 Order the clues from least to most identifying — that ordering is what makes a round a race instead
 of a lookup. [`spec.md`](spec.md) has the full content guidelines.
 
-```sh
-npm run lint                # client lint
-go test ./...               # server tests
-```
-
 ## Contributing
 
 Small, focused pull requests are welcome. Open an issue first for anything that changes game rules,
 timing, or the visual system, since those are specified deliberately in [`spec.md`](spec.md).
+
+Before opening a pull request:
+
+```sh
+npm run lint                # client lint
+go test ./...               # server tests
+```
 
 - [`spec.md`](spec.md) — game rules, screens, and the Restaurant Ticket visual system
 - [`architecture.md`](architecture.md) — deployment, real-time model, and observability

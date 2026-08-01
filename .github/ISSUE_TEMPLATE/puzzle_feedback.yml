@@ -1,11 +1,11 @@
-name: Puzzle feedback
+name: Dish feedback
 description: A dish felt wrong, unfair, or is missing from the catalog
-title: "[Puzzle]: "
+title: "[Dish]: "
 labels: ["content"]
 body:
   - type: markdown
     attributes:
-      value: Puzzles are curated by hand, so disputes are useful. Frequently disputed puzzles get revised or retired.
+      value: Dishes are curated by hand, so disputes are useful. Frequently disputed dishes get revised or retired.
   - type: dropdown
     id: kind
     attributes:
