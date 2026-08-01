@@ -47,6 +47,17 @@ type Store struct {
 	random  *mathrand.Rand
 }
 
+type Stats struct {
+	Matches        int
+	Rooms          int
+	Waiting        int
+	Playing        int
+	Result         int
+	Finished       int
+	BotMatches     int
+	QuickPlayQueue int
+}
+
 type match struct {
 	id          string
 	roomCode    string
@@ -132,6 +143,38 @@ func NewStore(puzzles []content.Puzzle) *Store {
 		now:     time.Now,
 		random:  mathrand.New(mathrand.NewSource(time.Now().UnixNano())),
 	}
+}
+
+func (s *Store) Stats() Stats {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	now := s.now()
+	s.cleanup(now)
+	for _, match := range s.matches {
+		s.advance(match, now)
+	}
+
+	stats := Stats{Matches: len(s.matches), Rooms: len(s.rooms)}
+	for _, match := range s.matches {
+		switch match.phase {
+		case "waiting":
+			stats.Waiting++
+			if match.roomCode == "" {
+				stats.QuickPlayQueue++
+			}
+		case "playing":
+			stats.Playing++
+		case "result":
+			stats.Result++
+		case "finished":
+			stats.Finished++
+		}
+		if match.bot {
+			stats.BotMatches++
+		}
+	}
+	return stats
 }
 
 // Join places a player in the oldest non-expired waiting match, or creates one.

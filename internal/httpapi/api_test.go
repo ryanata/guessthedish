@@ -297,6 +297,58 @@ func TestAPIRejectsUnknownJSONFields(t *testing.T) {
 	}
 }
 
+func TestMetricsExposeBoundedRoutesAndGameState(t *testing.T) {
+	server, client := testServer(t)
+	created := createMatch(t, client, server.URL, "Cook")
+	res, err := client.Do(authorizedRequest(t, http.MethodGet, server.URL+"/api/matches/"+created.ID, created.Token, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = res.Body.Close()
+
+	res, err = client.Get(server.URL + "/metrics")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(res.Body)
+	_ = res.Body.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	metrics := string(body)
+	for _, expected := range []string{
+		`route="/api/matches/{id}"`,
+		`guessthedish_matches{phase="waiting"} 1`,
+		`guessthedish_quick_play_queue 1`,
+		`guessthedish_process_uptime_seconds`,
+	} {
+		if !strings.Contains(metrics, expected) {
+			t.Fatalf("metrics missing %q:\n%s", expected, metrics)
+		}
+	}
+	if strings.Contains(metrics, created.ID) {
+		t.Fatalf("metrics leaked match ID %q", created.ID)
+	}
+}
+
+func TestMetricsNormalizeUnknownMethods(t *testing.T) {
+	handler := New(game.NewStore(nil), nil, t.TempDir())
+	for _, method := range []string{"CUSTOM-ONE", "CUSTOM-TWO"} {
+		req := httptest.NewRequest(method, "/api/catalog", nil)
+		res := httptest.NewRecorder()
+		handler.ServeHTTP(res, req)
+	}
+	res := httptest.NewRecorder()
+	handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	body := res.Body.String()
+	if strings.Count(body, `method="OTHER",route="/api/catalog"`) != 3 {
+		t.Fatalf("unknown methods were not normalized:\n%s", body)
+	}
+	if strings.Contains(body, "CUSTOM-") {
+		t.Fatalf("metrics retained an attacker-controlled method:\n%s", body)
+	}
+}
+
 func strconvQuote(value string) string {
 	encoded, _ := json.Marshal(value)
 	return string(encoded)

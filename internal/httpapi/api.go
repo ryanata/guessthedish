@@ -22,16 +22,18 @@ type API struct {
 
 func New(store *game.Store, catalog []content.Dish, distPath string) http.Handler {
 	api := &API{store: store, catalog: catalog}
+	metrics := newMetrics()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", api.health)
 	mux.HandleFunc("/readyz", api.health)
+	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) { metrics.serveHTTP(api, w, r) })
 	mux.HandleFunc("/api/catalog", api.catalogHandler)
 	mux.HandleFunc("/api/rooms", api.rooms)
 	mux.HandleFunc("/api/rooms/", api.room)
 	mux.HandleFunc("/api/matches", api.matches)
 	mux.HandleFunc("/api/matches/", api.match)
 	mux.Handle("/", staticHandler(distPath))
-	return mux
+	return metrics.instrument(mux)
 }
 
 func (a *API) rooms(w http.ResponseWriter, r *http.Request) {
