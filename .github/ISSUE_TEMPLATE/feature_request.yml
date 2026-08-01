@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest a new feature or a change to how the game plays
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to see?
+      description: Describe the feature or the rule change you have in mind.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does it solve?
+      description: What is annoying, confusing, or missing today?
+      placeholder: I want to rematch the same friend without sending a new invite link.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the game does this touch?
+      options:
+        - Quick Play and matchmaking
+        - Invite rooms
+        - Round timing and clue reveals
+        - Answering and search
+        - Visuals, sound, or accessibility
+        - Something else
