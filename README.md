@@ -115,12 +115,12 @@ with 4–12 clues:
 ```
 
 Order the clues from least to most identifying — that ordering is what makes a round a race instead
-of a lookup. [`spec.md`](spec.md) has the full content guidelines.
+of a lookup.
 
 ## Contributing
 
 Small, focused pull requests are welcome. Open an issue first for anything that changes game rules,
-timing, or the visual system, since those are specified deliberately in [`spec.md`](spec.md).
+timing, or the visual system, since those are deliberate design decisions rather than accidents.
 
 Before opening a pull request:
 
@@ -128,9 +128,6 @@ Before opening a pull request:
 npm run lint                # client lint
 go test ./...               # server tests
 ```
-
-- [`spec.md`](spec.md) — game rules, screens, and the Restaurant Ticket visual system
-- [`architecture.md`](architecture.md) — deployment, real-time model, and observability
 
 The Go server is server-authoritative and standard-library-only: it decides which correct answer
 arrived first, and clues, answers, and bot decisions never reach the browser early.
@@ -141,6 +138,7 @@ arrived first, and clues, answers, and bot decisions never reach the browser ear
 <summary>Endpoints, authorization, and snapshot fields</summary>
 
 - `GET /healthz` and `GET /readyz`
+- `GET /metrics` exposes Prometheus text-format request, match, and process metrics.
 - `GET /api/catalog` returns `{ "dishes": [{ "id", "name", "aliases" }] }`. The catalog is safe to
   publish because it lists every possible answer, never the current one.
 - `POST /api/matches` with `{ "name": "Guest" }` joins the oldest waiting human or creates a waiting
